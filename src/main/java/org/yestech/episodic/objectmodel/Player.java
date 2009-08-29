@@ -11,8 +11,8 @@ public class Player {
 
     @XmlElement(required = true)
     protected String name;
-    @XmlElement(name = "default", required = true)
-    protected boolean defaultVal;
+    @XmlElement(name = "defaut", required = true)
+    protected boolean defaultPlayer;
     @XmlElement(required = true)
     protected String embed;
     @XmlElement(required = true)
@@ -26,12 +26,12 @@ public class Player {
         this.name = value;
     }
 
-    public boolean isDefaultVal() {
-        return defaultVal;
+    public boolean isDefaultPlayer() {
+        return defaultPlayer;
     }
 
-    public void setDefaultVal(boolean value) {
-        this.defaultVal = value;
+    public void setDefaultPlayer(boolean value) {
+        this.defaultPlayer = value;
     }
 
     public String getEmbed() {
