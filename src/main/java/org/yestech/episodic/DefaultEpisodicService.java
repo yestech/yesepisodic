@@ -108,7 +108,7 @@ public class DefaultEpisodicService implements EpisodicService {
 
     }
 
-    public long createEpisode(String showId, String name, String[] assetIds, boolean publish, String description,
+    public String createEpisode(String showId, String name, String[] assetIds, boolean publish, String description,
                               String pingUrl, String... tags) {
 
 
