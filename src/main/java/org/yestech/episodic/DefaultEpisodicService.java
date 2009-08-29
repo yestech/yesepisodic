@@ -231,6 +231,10 @@ public class DefaultEpisodicService implements EpisodicService {
      * @return The signature needed for an episodic request.
      */
     protected String generateSignature(String secret, Map<String, String> map) {
+        return shaHex(buildSignatureString(secret, map));
+    }
+
+    String buildSignatureString(String secret, Map<String, String> map) {
         StringBuilder builder = new StringBuilder(secret);
 
         Set<String> keys = sortedKeys(map);
@@ -238,7 +242,7 @@ public class DefaultEpisodicService implements EpisodicService {
             builder.append(key).append('=').append(map.get(key));
         }
 
-        return shaHex(builder.toString());
+        return builder.toString();
     }
 
     /**
@@ -287,7 +291,8 @@ public class DefaultEpisodicService implements EpisodicService {
      * @throws JAXBException Thrown if there are issues with the xml stream passed in.
      */
     protected Object unmarshall(InputStream content) throws JAXBException {
-        JAXBContext ctx = JAXBContext.newInstance(Error.class,
+        JAXBContext ctx = JAXBContext.newInstance(
+                ErrorResponse.class,
                 CreateAssetResponse.class,
                 CreateEpisodeResponse.class,
                 Shows.class);

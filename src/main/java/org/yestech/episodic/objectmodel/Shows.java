@@ -5,6 +5,7 @@ import org.yestech.episodic.objectmodel.Show;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -18,7 +19,7 @@ import javax.xml.bind.annotation.XmlType;
     "show"
 })
 @XmlRootElement(name = "shows")
-public class Shows {
+public class Shows implements Serializable {
 
     @XmlElement(required = true)
     protected List<Show> show;

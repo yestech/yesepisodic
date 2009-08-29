@@ -7,7 +7,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.StringReader;
 
-import junit.framework.Assert;
 import static junit.framework.Assert.*;
 
 /**
@@ -28,7 +27,7 @@ public class CreateAssetResponseUnitTest {
 
     }
 
-    private static final String XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+    public static final String XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
             "<create_asset_response result=\"success\" asset_id=\"2856\"/>";
 
 

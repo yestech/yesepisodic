@@ -6,10 +6,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlAccessorType;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.Serializable;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "format")
-public class Format {
+public class Format implements Serializable {
 
     @XmlElement(required = true)
     protected String name;

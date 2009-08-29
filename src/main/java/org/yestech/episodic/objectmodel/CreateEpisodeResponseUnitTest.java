@@ -24,7 +24,7 @@ public class CreateEpisodeResponseUnitTest {
         assertEquals("kpxqtcwrb6dd", cer.getEpisodeId());
     }
 
-    private static final String XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+    public static final String XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
             "<create_episode_response result=\"success\" episode_id=\"kpxqtcwrb6dd\"/>";
 
 

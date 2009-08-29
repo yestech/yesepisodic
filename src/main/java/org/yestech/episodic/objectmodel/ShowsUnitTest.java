@@ -75,7 +75,7 @@ public class ShowsUnitTest {
     }
 
 
-    private static final String XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+    public static final String XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
             "<shows per_page=\"500\" pages=\"1\" page=\"1\" total=\"2\">\n" +
             "  <show>\n" +
             "    <id>1001</id>\n" +
