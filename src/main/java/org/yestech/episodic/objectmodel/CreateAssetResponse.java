@@ -11,7 +11,7 @@ import java.io.Serializable;
  * 
  * @author A.J. Wright
  */
-@XmlRootElement(name = "create-asset-response")
+@XmlRootElement(name = "create_asset_response")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class CreateAssetResponse implements Serializable {
 
