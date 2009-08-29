@@ -19,7 +19,6 @@ import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import java.util.*;
 
@@ -50,7 +49,7 @@ public class DefaultEpisodicService implements EpisodicService {
         this.apiKey = apiKey;
     }
 
-    public long createAsset(String showId, String name, File file, String... tags) throws IOException {
+    public long createAsset(long showId, String name, File file, String... tags) {
 
         PostMethod method = new PostMethod(WRITE_API_PREFIX + "create_asset");
 
@@ -63,31 +62,31 @@ public class DefaultEpisodicService implements EpisodicService {
             map.put("tags", tagString);
         }
 
-        map.put("show_id", showId);
-
-        List<Part> parts = new ArrayList<Part>();
-        parts.add(new StringPart("signature", generateSignature(secret, map)));
-        parts.add(new StringPart("key", apiKey));
-        parts.add(new FilePart("uploaded_data", file));
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            parts.add(new StringPart(entry.getKey(), entry.getValue()));
-        }
-
-        Part[] partArray = parts.toArray(new Part[parts.size()]);
-
-        MultipartRequestEntity mre = new MultipartRequestEntity(partArray, method.getParams());
-        method.setRequestEntity(mre);
-
-        HttpClient client = new HttpClient();
-
-        client.executeMethod(method);
-
-        if (method.getStatusCode() != 200) {
-            throw new EpisodicException(format("Server returned %s : %s", method.getStatusCode(), method.getStatusText()));
-        }
-
-
+        map.put("show_id", valueOf(showId));
         try {
+
+            List<Part> parts = new ArrayList<Part>();
+            parts.add(new StringPart("signature", generateSignature(secret, map)));
+            parts.add(new StringPart("key", apiKey));
+            parts.add(new FilePart("uploaded_data", file));
+            for (Map.Entry<String, String> entry : map.entrySet()) {
+                parts.add(new StringPart(entry.getKey(), entry.getValue()));
+            }
+
+            Part[] partArray = parts.toArray(new Part[parts.size()]);
+
+            MultipartRequestEntity mre = new MultipartRequestEntity(partArray, method.getParams());
+            method.setRequestEntity(mre);
+
+            HttpClient client = new HttpClient();
+
+            client.executeMethod(method);
+
+            if (method.getStatusCode() != 200) {
+                throw new EpisodicException(method.getStatusCode(), method.getStatusText());
+            }
+
+
             Object o = unmarshall(method.getResponseBodyAsStream());
 
             if (o instanceof ErrorResponse) {
@@ -99,6 +98,8 @@ public class DefaultEpisodicService implements EpisodicService {
             }
 
 
+        } catch (IOException e) {
+            throw new TransportException(e.getMessage(), e);
         } catch (JAXBException e) {
             throw new TransportException(e.getMessage(), e);
         } finally {
@@ -128,7 +129,7 @@ public class DefaultEpisodicService implements EpisodicService {
         map.put("asset_ids", join(assetIds));
         map.put("ping_url", pingUrl);
 
-        GetMethod method = new GetMethod(WRITE_API_PREFIX + "create_episode");
+        PostMethod method = new PostMethod(WRITE_API_PREFIX + "create_episode");
         method.getParams().setParameter("apiKey", apiKey);
         method.getParams().setParameter("signature", generateSignature(secret, map));
         for (Map.Entry<String, String> entry : map.entrySet()) {
@@ -141,7 +142,7 @@ public class DefaultEpisodicService implements EpisodicService {
             client.executeMethod(method);
 
             if (method.getStatusCode() != 200) {
-                throw new EpisodicException(format("Server returned %s : %s", method.getStatusCode(), method.getStatusText()));
+                throw new EpisodicException(method.getStatusCode(), method.getStatusText());
             }
 
             Object o = unmarshall(method.getResponseBodyAsStream());
@@ -204,7 +205,7 @@ public class DefaultEpisodicService implements EpisodicService {
 
 
         } catch (JAXBException e) {
-            throw new EpisodicException(e.getMessage(), e);
+            throw new TransportException(e.getMessage(), e);
         } catch (IOException e) {
             throw new TransportException(e.getMessage(), e);
         } finally {
@@ -213,16 +214,43 @@ public class DefaultEpisodicService implements EpisodicService {
 
     }
 
-    
+
+    /**
+     * Generates a signature with the algorithm specified by episodic:
+     * <p/>
+     * API Signature Generation
+     * <ol>
+     * <li> All API requests must include a signature parameter. The signature is generated performing the following steps.
+     * <li> Concatenate all query parameters except the API Key in the format "name=value" in alphabetical order by parameter name. There should not be an ampersand or any separator between "name=value" pairs.
+     * <li> Append the string from step 1 to the Secret Key so that you have [Secret Key][String from step 1] (ex. 77c062e551279b0a0b8bc69f9709f33bexpires=1229046347show_id=13).
+     * <li>Generate the SHA-256 hash value for the string resulting from steps 1 and 2.
+     * <ol>
+     *
+     * @param secret The secret key provided by episodic.
+     * @param map    A map of the parameters to be sent to.
+     * @return The signature needed for an episodic request.
+     */
     protected String generateSignature(String secret, Map<String, String> map) {
         StringBuilder builder = new StringBuilder(secret);
 
-        Set<String> keys = new TreeSet<String>(map.keySet());
+        Set<String> keys = sortedKeys(map);
         for (String key : keys) {
             builder.append(key).append('=').append(map.get(key));
         }
 
         return shaHex(builder.toString());
+    }
+
+    /**
+     * Returns the keys for the map in a set sorted alphabetically.
+     * <p/>
+     * This is used to help build the signature.
+     *
+     * @param map The map to get the keys for.
+     * @return The keys sorted alphabetically.
+     */
+    protected SortedSet<String> sortedKeys(Map<String, String> map) {
+        return new TreeSet<String>(map.keySet());
     }
 
     /**

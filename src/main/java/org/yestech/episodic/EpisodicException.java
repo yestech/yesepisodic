@@ -30,14 +30,6 @@ public class EpisodicException extends RuntimeException {
         this.code = code;
     }
 
-    public EpisodicException(String message) {
-        super(message);
-    }
-
-    public EpisodicException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
     public int getCode() {
         return code;
     }
