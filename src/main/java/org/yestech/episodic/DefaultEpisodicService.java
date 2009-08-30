@@ -166,7 +166,7 @@ public class DefaultEpisodicService implements EpisodicService {
 
     }
 
-    public Shows getShows(SortBy sortBy, SortDir sortDir, Integer page, Integer perPage, String... showIds) {
+    public Shows getShows(String[] showIds, SortBy sortBy, SortDir sortDir, Integer page, Integer perPage) {
 
 
         Map<String, String> map = new HashMap<String, String>();
@@ -213,6 +213,7 @@ public class DefaultEpisodicService implements EpisodicService {
         }
 
     }
+
 
 
     /**

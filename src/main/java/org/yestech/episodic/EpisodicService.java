@@ -32,16 +32,16 @@ public interface EpisodicService {
     /**
      * The Shows method can be used to get data about a specific show, set of shows or all shows in your network.
      *
+     * @param showIds (optional) ids of show's to return
      * @param sortBy  (optional) The sort_by parameter is optional and specifies a field to sort the results by.
      * @param sortDir (optional) The sort_dir parameter is optional and specifies the sort direction.
      * @param page    (optional) A value that must be an integer indicating the page number to return the results for.
      *                The default is 1.
      * @param perPage (optional) A value that must be an integer indicating the number of items per page.
      *                The default is 20. NOTE: The smaller this value is the better your response times will be.
-     * @param showIds (optional) ids of show's to return
      * @return All the shows that match the specified params.
      */
-    Shows getShows(SortBy sortBy, SortDir sortDir, Integer page, Integer perPage, String... showIds);
+    Shows getShows(String[] showIds, SortBy sortBy, SortDir sortDir, Integer page, Integer perPage);
 
     /**
      * The createAsset method is used to upload a new video or image asset for use in one of your shows.
