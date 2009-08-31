@@ -2,6 +2,7 @@ package org.yestech.episodic;
 
 import static org.apache.commons.codec.digest.DigestUtils.shaHex;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.multipart.FilePart;
@@ -27,8 +28,9 @@ import java.util.*;
  */
 public class DefaultEpisodicService implements EpisodicService {
 
+
     protected static final String WRITE_API_PREFIX = "http://api.episodic.com/api/v2/write/";
-    protected static final String QUERY_API_PREFIX = "http://api.episodic.com/api/v2/query/shows/";
+    protected static final String QUERY_API_PREFIX = "http://api.episodic.com/api/v2/query/";
 
     protected String apiKey;
     protected String secret;
@@ -125,10 +127,10 @@ public class DefaultEpisodicService implements EpisodicService {
         map.put("ping_url", pingUrl);
 
         PostMethod method = new PostMethod(WRITE_API_PREFIX + "create_episode");
-        method.getParams().setParameter("apiKey", apiKey);
-        method.getParams().setParameter("signature", generateSignature(secret, map));
+        method.setParameter("key", apiKey);
+        method.setParameter("signature", generateSignature(secret, map));
         for (Map.Entry<String, String> entry : map.entrySet()) {
-            method.getParams().setParameter(entry.getKey(), entry.getValue());
+            method.setParameter(entry.getKey(), entry.getValue());
         }
 
 
@@ -171,13 +173,14 @@ public class DefaultEpisodicService implements EpisodicService {
         if (page != null) map.put("page", page.toString());
         if (perPage != null) map.put("per_page", perPage.toString());
         if (showIds != null && showIds.length > 0) map.put("id", join(showIds));
+        
+        map.put("signature", generateSignature(secret, map));
+        map.put("key", apiKey);
+
+        NameValuePair[] queryParams = toNameValuePairArray(map);
 
         GetMethod method = new GetMethod(QUERY_API_PREFIX + "shows");
-        method.getParams().setParameter("apiKey", apiKey);
-        method.getParams().setParameter("signature", generateSignature(secret, map));
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            method.getParams().setParameter(entry.getKey(), entry.getValue());
-        }
+        method.setQueryString(queryParams);
 
 
         try {
@@ -227,7 +230,7 @@ public class DefaultEpisodicService implements EpisodicService {
                 sortDir, includeViews, page, perPage, embedWidth, embedHeight);
 
         GetMethod method = new GetMethod(QUERY_API_PREFIX + "episodes");
-        method.getParams().setParameter("apiKey", apiKey);
+        method.getParams().setParameter("key", apiKey);
         method.getParams().setParameter("signature", generateSignature(secret, map));
         for (Map.Entry<String, String> entry : map.entrySet()) {
             method.getParams().setParameter(entry.getKey(), entry.getValue());

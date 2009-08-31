@@ -4,6 +4,7 @@ import org.yestech.episodic.objectmodel.ErrorResponse;
 import org.yestech.episodic.objectmodel.CreateAssetResponse;
 import org.yestech.episodic.objectmodel.CreateEpisodeResponse;
 import org.yestech.episodic.objectmodel.Shows;
+import org.apache.commons.httpclient.NameValuePair;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.JAXBContext;
@@ -13,6 +14,7 @@ import static java.lang.String.valueOf;
 import java.util.SortedSet;
 import java.util.Map;
 import java.util.TreeSet;
+import java.util.ArrayList;
 
 /**
  * @author A.J. Wright
@@ -76,6 +78,16 @@ public final class EpisodicUtil {
      */
     public static SortedSet<String> sortedKeys(Map<String, String> map) {
         return new TreeSet<String>(map.keySet());
+    }
+
+    public static NameValuePair[] toNameValuePairArray(Map<String,String> map) {
+        NameValuePair[] pairs = new NameValuePair[map.size()];
+        int count = 0;
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            pairs[count] = new NameValuePair(entry.getKey(), entry.getValue());
+            count++;
+        }
+        return pairs;
     }
 
 
