@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Arrays;
 
 /**
  * @author A.J. Wright
@@ -25,7 +26,7 @@ public class Episode implements Serializable {
     }
 
     @XmlElement
-    protected long id;
+    protected String id;
     @XmlElement
     protected String name;
     @XmlElement
@@ -52,11 +53,11 @@ public class Episode implements Serializable {
     })
     protected List<Download> downloads;
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -139,15 +140,15 @@ public class Episode implements Serializable {
 
         Episode episode = (Episode) o;
 
-        if (id != episode.id) return false;
         if (airDate != null ? !airDate.equals(episode.airDate) : episode.airDate != null) return false;
         if (description != null ? !description.equals(episode.description) : episode.description != null) return false;
         if (downloads != null ? !downloads.equals(episode.downloads) : episode.downloads != null) return false;
         if (duration != null ? !duration.equals(episode.duration) : episode.duration != null) return false;
+        if (id != null ? !id.equals(episode.id) : episode.id != null) return false;
         if (name != null ? !name.equals(episode.name) : episode.name != null) return false;
         if (players != null ? !players.equals(episode.players) : episode.players != null) return false;
         if (status != episode.status) return false;
-        if (tags != null ? !tags.equals(episode.tags) : episode.tags != null) return false;
+        if (!Arrays.equals(tags, episode.tags)) return false;
         //noinspection RedundantIfStatement
         if (thumbnails != null ? !thumbnails.equals(episode.thumbnails) : episode.thumbnails != null) return false;
 
@@ -156,10 +157,10 @@ public class Episode implements Serializable {
 
     @Override
     public int hashCode() {
-        int result = (int) (id ^ (id >>> 32));
+        int result = id != null ? id.hashCode() : 0;
         result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (description != null ? description.hashCode() : 0);
-        result = 31 * result + (tags != null ? tags.hashCode() : 0);
+        result = 31 * result + (tags != null ? Arrays.hashCode(tags) : 0);
         result = 31 * result + (airDate != null ? airDate.hashCode() : 0);
         result = 31 * result + (duration != null ? duration.hashCode() : 0);
         result = 31 * result + (status != null ? status.hashCode() : 0);
@@ -175,7 +176,7 @@ public class Episode implements Serializable {
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
-                ", tags='" + tags + '\'' +
+                ", tags=" + (tags == null ? null : Arrays.asList(tags)) +
                 ", airDate=" + airDate +
                 ", duration='" + duration + '\'' +
                 ", status=" + status +

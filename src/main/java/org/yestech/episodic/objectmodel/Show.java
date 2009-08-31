@@ -11,7 +11,7 @@ import java.io.Serializable;
 public class Show implements Serializable {
 
     @XmlElement(required = true)
-    protected long id;
+    protected String id;
 
     @XmlElement
     protected String name;
@@ -31,11 +31,11 @@ public class Show implements Serializable {
     @XmlElement(name = "format")
     protected Format format;
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(long value) {
+    public void setId(String value) {
         this.id = value;
     }
 
@@ -94,10 +94,10 @@ public class Show implements Serializable {
 
         Show show = (Show) o;
 
-        if (id != show.id) return false;
         if (description != null ? !description.equals(show.description) : show.description != null) return false;
         if (error != null ? !error.equals(show.error) : show.error != null) return false;
         if (format != null ? !format.equals(show.format) : show.format != null) return false;
+        if (id != null ? !id.equals(show.id) : show.id != null) return false;
         if (itunesUrl != null ? !itunesUrl.equals(show.itunesUrl) : show.itunesUrl != null) return false;
         if (name != null ? !name.equals(show.name) : show.name != null) return false;
         //noinspection RedundantIfStatement
@@ -108,7 +108,7 @@ public class Show implements Serializable {
 
     @Override
     public int hashCode() {
-        int result = (int) (id ^ (id >>> 32));
+        int result = id != null ? id.hashCode() : 0;
         result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (description != null ? description.hashCode() : 0);
         result = 31 * result + (error != null ? error.hashCode() : 0);

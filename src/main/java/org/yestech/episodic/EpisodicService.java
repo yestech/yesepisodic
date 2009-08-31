@@ -49,7 +49,7 @@ public interface EpisodicService {
      * @param tags   (optional) Tags to be applied to the new asset.
      * @return The id of the newly created asset.
      */
-    long createAsset(long showId, String name, File file, String... tags);
+    String createAsset(String showId, String name, File file, String... tags);
 
     /**
      * Creates a new episode.
@@ -70,7 +70,7 @@ public interface EpisodicService {
      * @param tags        (optional) Tags to be applied to the new episode.
      * @return The id of the new episode.
      */
-    String createEpisode(long showId, String name, long[] assetIds, boolean publish, String description,
+    String createEpisode(String showId, String name, String[] assetIds, boolean publish, String description,
                          String pingUrl, String... tags);
 
     /**

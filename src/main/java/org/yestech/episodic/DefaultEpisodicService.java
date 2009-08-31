@@ -3,6 +3,7 @@ package org.yestech.episodic;
 import static org.apache.commons.codec.digest.DigestUtils.sha256Hex;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.NameValuePair;
+import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.multipart.FilePart;
@@ -34,6 +35,7 @@ public class DefaultEpisodicService implements EpisodicService {
 
     protected String apiKey;
     protected String secret;
+    protected HostConfiguration configuration;
 
     /**
      * Creates a new instance .
@@ -44,9 +46,17 @@ public class DefaultEpisodicService implements EpisodicService {
     public DefaultEpisodicService(String secret, String apiKey) {
         this.secret = secret;
         this.apiKey = apiKey;
+        configuration = new HostConfiguration();
     }
 
-    public long createAsset(long showId, String name, File file, String... tags) {
+    public DefaultEpisodicService(String secret, String apiKey, String proxyHost, int proxyPort) {
+        this.secret = secret;
+        this.apiKey = apiKey;
+        configuration = new HostConfiguration();
+        configuration.setProxy(proxyHost, proxyPort);
+    }
+
+    public String createAsset(String showId, String name, File file, String... tags) {
 
         PostMethod method = new PostMethod(WRITE_API_PREFIX + "create_asset");
 
@@ -77,7 +87,7 @@ public class DefaultEpisodicService implements EpisodicService {
 
             HttpClient client = new HttpClient();
 
-            client.executeMethod(method);
+            client.executeMethod(configuration, method);
 
             if (method.getStatusCode() != 200) {
                 throw new EpisodicException(method.getStatusCode(), method.getStatusText());
@@ -105,7 +115,7 @@ public class DefaultEpisodicService implements EpisodicService {
 
     }
 
-    public String createEpisode(long showId, String name, long[] assetIds, boolean publish, String description,
+    public String createEpisode(String showId, String name, String[] assetIds, boolean publish, String description,
                                 String pingUrl, String... tags) {
 
 
@@ -123,14 +133,7 @@ public class DefaultEpisodicService implements EpisodicService {
         if (description != null) map.put("description", description);
         if (pingUrl != null) map.put("ping_url", pingUrl);
 
-        // convert the asset ids to a string
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < assetIds.length; i++) {
-            builder.append(assetIds[i]);
-            if (i + 1 < assetIds.length) builder.append(',');
-        }
-
-        map.put("asset_ids", builder.toString());
+        map.put("asset_ids", join(assetIds));
         if (pingUrl != null) map.put("ping_url", pingUrl);
 
         PostMethod method = new PostMethod(WRITE_API_PREFIX + "create_episode");
@@ -142,7 +145,7 @@ public class DefaultEpisodicService implements EpisodicService {
 
         try {
             HttpClient client = new HttpClient();
-            client.executeMethod(method);
+            client.executeMethod(configuration, method);
 
             if (method.getStatusCode() != 200) {
                 throw new EpisodicException(method.getStatusCode(), method.getStatusText());
@@ -191,7 +194,7 @@ public class DefaultEpisodicService implements EpisodicService {
 
         try {
             HttpClient client = new HttpClient();
-            client.executeMethod(method);
+            client.executeMethod(configuration, method);
 
             if (method.getStatusCode() != 200) {
                 throw new EpisodicException(method.getStatusCode(), method.getStatusText());
@@ -246,7 +249,7 @@ public class DefaultEpisodicService implements EpisodicService {
 
         try {
             HttpClient client = new HttpClient();
-            client.executeMethod(method);
+            client.executeMethod(configuration, method);
 
             if (method.getStatusCode() != 200) {
                 throw new EpisodicException(method.getStatusCode(), method.getStatusText());

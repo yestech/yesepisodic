@@ -19,7 +19,7 @@ public class CreateAssetResponse implements Serializable {
     protected String result;
 
     @XmlAttribute(name = "asset_id")
-    protected long assetId;
+    protected String assetId;
 
     /**
      * The string result returned from episodic. If the request was successful this should be "success"
@@ -39,11 +39,11 @@ public class CreateAssetResponse implements Serializable {
      *
      * @return the id of the newly created asset.
      */
-    public long getAssetId() {
+    public String getAssetId() {
         return assetId;
     }
 
-    public void setAssetId(long assetId) {
+    public void setAssetId(String assetId) {
         this.assetId = assetId;
     }
 
@@ -54,7 +54,7 @@ public class CreateAssetResponse implements Serializable {
 
         CreateAssetResponse that = (CreateAssetResponse) o;
 
-        if (assetId != that.assetId) return false;
+        if (assetId != null ? !assetId.equals(that.assetId) : that.assetId != null) return false;
         //noinspection RedundantIfStatement
         if (result != null ? !result.equals(that.result) : that.result != null) return false;
 
@@ -64,7 +64,7 @@ public class CreateAssetResponse implements Serializable {
     @Override
     public int hashCode() {
         int result1 = result != null ? result.hashCode() : 0;
-        result1 = 31 * result1 + (int) (assetId ^ (assetId >>> 32));
+        result1 = 31 * result1 + (assetId != null ? assetId.hashCode() : 0);
         return result1;
     }
 
@@ -72,7 +72,7 @@ public class CreateAssetResponse implements Serializable {
     public String toString() {
         return "CreateAssetResponse{" +
                 "result='" + result + '\'' +
-                ", assetId=" + assetId +
+                ", assetId='" + assetId + '\'' +
                 '}';
     }
 }
