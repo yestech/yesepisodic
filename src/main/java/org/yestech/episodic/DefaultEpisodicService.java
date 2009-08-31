@@ -173,7 +173,7 @@ public class DefaultEpisodicService implements EpisodicService {
         if (page != null) map.put("page", page.toString());
         if (perPage != null) map.put("per_page", perPage.toString());
         if (showIds != null && showIds.length > 0) map.put("id", join(showIds));
-        
+
         map.put("signature", generateSignature(secret, map));
         map.put("key", apiKey);
 
@@ -229,13 +229,15 @@ public class DefaultEpisodicService implements EpisodicService {
         Map<String, String> map = buildEpisodeMap(showIds, episodeIds, searchTerm, searchType, tagMode, status, sortBy,
                 sortDir, includeViews, page, perPage, embedWidth, embedHeight);
 
-        GetMethod method = new GetMethod(QUERY_API_PREFIX + "episodes");
-        method.getParams().setParameter("key", apiKey);
-        method.getParams().setParameter("signature", generateSignature(secret, map));
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            method.getParams().setParameter(entry.getKey(), entry.getValue());
-        }
+        map.put("signature", generateSignature(secret, map));
+        map.put("key", apiKey);
 
+        NameValuePair[] queryParams = toNameValuePairArray(map);
+
+
+        GetMethod method = new GetMethod(QUERY_API_PREFIX + "episodes");
+        method.setQueryString(queryParams);
+        
         try {
             HttpClient client = new HttpClient();
             client.executeMethod(method);
