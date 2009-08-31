@@ -8,10 +8,7 @@ import org.apache.commons.httpclient.methods.multipart.FilePart;
 import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
-import org.yestech.episodic.objectmodel.CreateAssetResponse;
-import org.yestech.episodic.objectmodel.CreateEpisodeResponse;
-import org.yestech.episodic.objectmodel.ErrorResponse;
-import org.yestech.episodic.objectmodel.Shows;
+import org.yestech.episodic.objectmodel.*;
 import static org.yestech.episodic.util.EpisodicUtil.*;
 
 import javax.xml.bind.JAXBException;
@@ -175,7 +172,7 @@ public class DefaultEpisodicService implements EpisodicService {
         if (perPage != null) map.put("per_page", perPage.toString());
         if (showIds != null && showIds.length > 0) map.put("id", join(showIds));
 
-        GetMethod method = new GetMethod();
+        GetMethod method = new GetMethod(QUERY_API_PREFIX + "shows");
         method.getParams().setParameter("apiKey", apiKey);
         method.getParams().setParameter("signature", generateSignature(secret, map));
         for (Map.Entry<String, String> entry : map.entrySet()) {
@@ -197,6 +194,59 @@ public class DefaultEpisodicService implements EpisodicService {
                 throw new EpisodicException((ErrorResponse) o);
             } else if (o instanceof Shows) {
                 return (Shows) o;
+            } else {
+                throw new IllegalStateException("unknown response : " + o);
+            }
+
+
+        } catch (JAXBException e) {
+            throw new TransportException(e.getMessage(), e);
+        } catch (IOException e) {
+            throw new TransportException(e.getMessage(), e);
+        } finally {
+            method.releaseConnection();
+        }
+
+    }
+
+    public Episodes getEpisodes(String[] showIds,
+                                String[] episodeIds,
+                                String searchTerm,
+                                SearchType searchType,
+                                TagMode tagMode,
+                                Episode.EpisodeStatus status,
+                                SortBy sortBy,
+                                SortDir sortDir,
+                                Boolean includeViews,
+                                Integer page,
+                                Integer perPage,
+                                Integer embedWidth,
+                                Integer embedHeight) {
+
+        Map<String, String> map = buildEpisodeMap(showIds, episodeIds, searchTerm, searchType, tagMode, status, sortBy,
+                sortDir, includeViews, page, perPage, embedWidth, embedHeight);
+
+        GetMethod method = new GetMethod(QUERY_API_PREFIX + "episodes");
+        method.getParams().setParameter("apiKey", apiKey);
+        method.getParams().setParameter("signature", generateSignature(secret, map));
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            method.getParams().setParameter(entry.getKey(), entry.getValue());
+        }
+
+        try {
+            HttpClient client = new HttpClient();
+            client.executeMethod(method);
+
+            if (method.getStatusCode() != 200) {
+                throw new EpisodicException(method.getStatusCode(), method.getStatusText());
+            }
+
+            Object o = unmarshall(method.getResponseBodyAsStream());
+
+            if (o instanceof ErrorResponse) {
+                throw new EpisodicException((ErrorResponse) o);
+            } else if (o instanceof Episodes) {
+                return (Episodes) o;
             } else {
                 throw new IllegalStateException("unknown response : " + o);
             }
@@ -241,6 +291,28 @@ public class DefaultEpisodicService implements EpisodicService {
         }
 
         return builder.toString();
+    }
+
+    // split out because episode map method was too complex for intellij
+    private Map<String, String> buildEpisodeMap(String[] showIds, String[] episodeIds, String searchTerm,
+                                                SearchType searchType, TagMode tagMode, Episode.EpisodeStatus status,
+                                                SortBy sortBy, SortDir sortDir, Boolean includeViews, Integer page,
+                                                Integer perPage, Integer embedWidth, Integer embedHeight) {
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("expires", expires());
+        if (showIds != null) map.put("show_id", join(showIds));
+        if (episodeIds != null) map.put("id", join(episodeIds));
+        if (searchTerm != null) map.put("search_type", searchType.name());
+        if (tagMode != null) map.put("tag_mode", tagMode.name());
+        if (status != null) map.put("status", status.name());
+        if (sortBy != null) map.put("sort_by", sortBy.name());
+        if (sortDir != null) map.put("sort_dir", sortDir.name());
+        if (includeViews != null) map.put("include_views", includeViews.toString());
+        if (page != null) map.put("page", page.toString());
+        if (perPage != null) map.put("per_page", perPage.toString());
+        if (embedWidth != null) map.put("embed_width", embedWidth.toString());
+        if (embedHeight != null) map.put("embed_height", embedHeight.toString());
+        return map;
     }
 
 
