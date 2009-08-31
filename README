@@ -1,0 +1,12 @@
+A java based api for interacting with Episodic (http://episodic.com).
+
+This api will require that you provide too things:
+1. Your secret key from episodic
+2. Your public api key from episodic
+
+To start using the api do the following:
+
+EpisodicService svc = new DefaultEpisodicService(secret,apiKey);
+
+Please view the javadoc for any other information.
+

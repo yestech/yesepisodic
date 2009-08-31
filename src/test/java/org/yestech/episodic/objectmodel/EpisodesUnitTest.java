@@ -28,7 +28,7 @@ public class EpisodesUnitTest {
         assertEquals(2, episodes.getEpisode().size());
 
         Episode e = episodes.getEpisode().get(0);
-        assertEquals(10, e.getId());
+        assertEquals("10", e.getId());
         assertEquals("My Fun Episode", e.getName());
         assertEquals("This is an episode about fun things.", e.getDescription());
         assertEquals(0, e.getTags().length);
@@ -89,7 +89,7 @@ public class EpisodesUnitTest {
         assertEquals("[MP4 URL Goes Here]", download.getUrl());
 
         e = episodes.getEpisode().get(1);
-        assertEquals(28, e.getId());
+        assertEquals("28", e.getId());
         assertEquals("My Other Episode", e.getName());
         assertEquals("", e.getDescription());
         String[] tags = e.getTags();

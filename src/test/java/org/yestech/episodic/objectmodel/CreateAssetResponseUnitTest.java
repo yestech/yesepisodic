@@ -22,7 +22,7 @@ public class CreateAssetResponseUnitTest {
         CreateAssetResponse car = (CreateAssetResponse) unmarshaller.unmarshal(new StringReader(XML));
         assertNotNull(car);
         assertEquals("success", car.getResult());
-        assertEquals(2856, car.getAssetId());
+        assertEquals("2856", car.getAssetId());
 
 
     }

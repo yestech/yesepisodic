@@ -5,6 +5,7 @@ import org.yestech.episodic.objectmodel.CreateAssetResponse;
 import org.yestech.episodic.objectmodel.CreateEpisodeResponse;
 import org.yestech.episodic.objectmodel.Shows;
 import org.apache.commons.httpclient.NameValuePair;
+import org.joda.time.DateTime;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.JAXBContext;
@@ -62,10 +63,14 @@ public final class EpisodicUtil {
      * <p/>
      * The current number of seconds since epoch (January 1, 1970).
      *
+     * Actually there is a 10 minute buffer on this so that it will not time out for long uploads.
+     *
+     *
      * @return The current number of seconds since the epoch;
      */
     public static String expires() {
-        return valueOf(System.currentTimeMillis() / 1000L);
+        DateTime dt = new DateTime().plusMinutes(15);
+        return valueOf(dt.getMillis() / 1000L);
     }
 
     /**

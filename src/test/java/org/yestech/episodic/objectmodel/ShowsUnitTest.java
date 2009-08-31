@@ -30,7 +30,7 @@ public class ShowsUnitTest {
         Show show = shows.getShow().get(0);
         assertNull(show.getError());
         assertNotNull(show);
-        assertEquals(1001L, (long) show.getId());
+        assertEquals("1001", show.getId());
         assertEquals("My Show", show.getName());
         assertEquals("My Show is about things that are both great and awesome!", show.getDescription());
         assertEquals("asldkfjasdflj", show.getPageUrl());
@@ -61,7 +61,7 @@ public class ShowsUnitTest {
 
         show = shows.getShow().get(1);
         assertNotNull(show);
-        assertEquals(1002L, (long) show.getId());
+        assertEquals("1002", show.getId());
         assertNull(show.getName());
         assertNull(show.getDescription());
         assertNull(show.getPageUrl());

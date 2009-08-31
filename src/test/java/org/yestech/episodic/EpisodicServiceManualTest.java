@@ -54,7 +54,7 @@ public class EpisodicServiceManualTest {
         assertNotNull(l);
         System.out.println(l);
 
-        String id = episodicService.createEpisode(show, "episode2", new String[] {l}, true, "tes test test", null, "test");
+        String id = episodicService.createEpisode(show, "episode3", new String[] {l}, true, "tes test test", null, "test");
         assertNotNull(id);
         System.out.println(id);
 
