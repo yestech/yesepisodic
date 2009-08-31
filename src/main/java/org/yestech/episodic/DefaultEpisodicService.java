@@ -12,13 +12,11 @@ import org.yestech.episodic.objectmodel.CreateAssetResponse;
 import org.yestech.episodic.objectmodel.CreateEpisodeResponse;
 import org.yestech.episodic.objectmodel.ErrorResponse;
 import org.yestech.episodic.objectmodel.Shows;
+import static org.yestech.episodic.util.EpisodicUtil.*;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import static java.lang.String.valueOf;
 import java.util.*;
 
@@ -109,7 +107,7 @@ public class DefaultEpisodicService implements EpisodicService {
     }
 
     public String createEpisode(String showId, String name, String[] assetIds, boolean publish, String description,
-                              String pingUrl, String... tags) {
+                                String pingUrl, String... tags) {
 
 
         Map<String, String> map = new HashMap<String, String>();
@@ -215,7 +213,6 @@ public class DefaultEpisodicService implements EpisodicService {
     }
 
 
-
     /**
      * Generates a signature with the algorithm specified by episodic:
      * <p/>
@@ -246,59 +243,5 @@ public class DefaultEpisodicService implements EpisodicService {
         return builder.toString();
     }
 
-    /**
-     * Returns the keys for the map in a set sorted alphabetically.
-     * <p/>
-     * This is used to help build the signature.
-     *
-     * @param map The map to get the keys for.
-     * @return The keys sorted alphabetically.
-     */
-    protected SortedSet<String> sortedKeys(Map<String, String> map) {
-        return new TreeSet<String>(map.keySet());
-    }
-
-    /**
-     * Generates the expires value needed to add to episodic reuqests.
-     * <p/>
-     * The current number of seconds since epoch (January 1, 1970).
-     *
-     * @return The current number of seconds since the epoch;
-     */
-    protected String expires() {
-        return valueOf(System.currentTimeMillis() / 1000L);
-    }
-
-    /**
-     * A simple method for joining an array of strings to a comma seperated string.
-     *
-     * @param strings An array of strings.
-     * @return The array as single string joined by commas
-     */
-    protected String join(String[] strings) {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < strings.length; i++) {
-            builder.append(strings[i]);
-            if (i + 1 < strings.length) builder.append(",");
-        }
-        return builder.toString();
-    }
-
-    /**
-     * Unmarshalls the input stream into an object from org.yestech.episodic.objectmodel.
-     *
-     * @param content input stream containing xml content.
-     * @return The unmarshalled object.
-     * @throws JAXBException Thrown if there are issues with the xml stream passed in.
-     */
-    protected Object unmarshall(InputStream content) throws JAXBException {
-        JAXBContext ctx = JAXBContext.newInstance(
-                ErrorResponse.class,
-                CreateAssetResponse.class,
-                CreateEpisodeResponse.class,
-                Shows.class);
-        Unmarshaller unmarshaller = ctx.createUnmarshaller();
-        return unmarshaller.unmarshal(content);
-    }
 
 }

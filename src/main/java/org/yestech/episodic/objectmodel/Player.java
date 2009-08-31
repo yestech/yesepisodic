@@ -1,9 +1,6 @@
 package org.yestech.episodic.objectmodel;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
 import java.io.Serializable;
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -12,10 +9,10 @@ public class Player implements Serializable {
 
     @XmlElement(required = true)
     protected String name;
-    @XmlElement(name = "defaut", required = true)
+    @XmlAttribute(name = "default", required = true)
     protected boolean defaultPlayer;
-    @XmlElement(required = true)
-    protected String embed;
+    @XmlElement(name = "embed_code", required = true)
+    protected String embedCode;
     @XmlElement(required = true)
     protected String config;
 
@@ -35,12 +32,12 @@ public class Player implements Serializable {
         this.defaultPlayer = value;
     }
 
-    public String getEmbed() {
-        return embed;
+    public String getEmbedCode() {
+        return embedCode;
     }
 
-    public void setEmbed(String value) {
-        this.embed = value;
+    public void setEmbedCode(String value) {
+        this.embedCode = value;
     }
 
     public String getConfig() {

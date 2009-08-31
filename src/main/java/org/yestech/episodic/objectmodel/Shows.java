@@ -15,9 +15,6 @@ import javax.xml.bind.annotation.XmlType;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = {
-    "show"
-})
 @XmlRootElement(name = "shows")
 public class Shows implements Serializable {
 

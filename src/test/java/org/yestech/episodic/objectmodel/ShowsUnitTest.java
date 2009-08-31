@@ -49,14 +49,14 @@ public class ShowsUnitTest {
         assertNotNull(player);
         assertEquals("My Custom Player", player.getName());
         assertEquals(true, player.isDefaultPlayer());
-        assertEquals("[Escaped Embed Code Goes Here]", player.getEmbed());
+        assertEquals("[Escaped Embed Code Goes Here]", player.getEmbedCode());
         assertEquals("[Escaped Config URL Goes Here]", player.getConfig());
 
         player = format.getPlayer().get(1);
         assertNotNull(player);
         assertEquals("Default Player", player.getName());
         assertEquals(false, player.isDefaultPlayer());
-        assertEquals("[Escaped Embed Code Goes Here]", player.getEmbed());
+        assertEquals("[Escaped Embed Code Goes Here]", player.getEmbedCode());
         assertEquals("[Escaped Config URL Goes Here]", player.getConfig());
 
         show = shows.getShow().get(1);
