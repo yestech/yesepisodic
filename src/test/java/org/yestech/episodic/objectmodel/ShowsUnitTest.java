@@ -88,16 +88,14 @@ public class ShowsUnitTest {
             "      <width>848</width>\n" +
             "      <height>480</height>\n" +
             "      <thumbnail_url>[Thumbnail URL Goes Here]</thumbnail_url>\n" +
-            "      <player>\n" +
+            "      <player default=\"true\">\n" +
             "        <name>My Custom Player</name>\n" +
-            "        <defaut>true</defaut>\n" +
-            "        <embed>[Escaped Embed Code Goes Here]</embed>\n" +
+            "        <embed_code>[Escaped Embed Code Goes Here]</embed_code>\n" +
             "        <config>[Escaped Config URL Goes Here]</config>\n" +
             "      </player>\n" +
-            "      <player>\n" +
+            "      <player default=\"false\">\n" +
             "        <name>Default Player</name>\n" +
-            "        <defaut>false</defaut>\n" +
-            "        <embed>[Escaped Embed Code Goes Here]</embed>\n" +
+            "        <embed_code>[Escaped Embed Code Goes Here]</embed_code>\n" +
             "        <config>[Escaped Config URL Goes Here]</config>\n" +
             "      </player>\n" +
             "    </format>\n" +
