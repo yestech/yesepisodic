@@ -1,6 +1,6 @@
 package org.yestech.episodic;
 
-import static org.apache.commons.codec.digest.DigestUtils.shaHex;
+import static org.apache.commons.codec.digest.DigestUtils.sha256Hex;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -284,7 +284,7 @@ public class DefaultEpisodicService implements EpisodicService {
      * @return The signature needed for an episodic request.
      */
     protected String generateSignature(String secret, Map<String, String> map) {
-        return shaHex(buildSignatureString(secret, map));
+        return sha256Hex(buildSignatureString(secret, map));
     }
 
     String buildSignatureString(String secret, Map<String, String> map) {
