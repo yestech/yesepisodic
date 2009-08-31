@@ -70,7 +70,7 @@ public interface EpisodicService {
      * @param tags        (optional) Tags to be applied to the new episode.
      * @return The id of the new episode.
      */
-    String createEpisode(String showId, String name, String[] assetIds, boolean publish, String description,
+    String createEpisode(long showId, String name, long[] assetIds, boolean publish, String description,
                          String pingUrl, String... tags);
 
     /**

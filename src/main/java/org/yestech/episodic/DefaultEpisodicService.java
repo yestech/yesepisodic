@@ -50,25 +50,25 @@ public class DefaultEpisodicService implements EpisodicService {
 
         PostMethod method = new PostMethod(WRITE_API_PREFIX + "create_asset");
 
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("expires", expires());
-        map.put("name", name);
 
-        if (tags != null && tags.length > 0) {
-            String tagString = join(tags);
-            map.put("tags", tagString);
-        }
-
-        map.put("show_id", valueOf(showId));
         try {
 
+            Map<String, String> map = new HashMap<String, String>();
+            map.put("expires", expires());
+            map.put("name", name);
+
+            if (tags != null && tags.length > 0) {
+                String tagString = join(tags);
+                map.put("tags", tagString);
+            }
+            map.put("show_id", valueOf(showId));
             List<Part> parts = new ArrayList<Part>();
-            parts.add(new StringPart("signature", generateSignature(secret, map)));
-            parts.add(new StringPart("key", apiKey));
-            parts.add(new FilePart("uploaded_data", file));
             for (Map.Entry<String, String> entry : map.entrySet()) {
                 parts.add(new StringPart(entry.getKey(), entry.getValue()));
             }
+            parts.add(new StringPart("signature", generateSignature(secret, map)));
+            parts.add(new StringPart("key", apiKey));
+            parts.add(new FilePart("uploaded_data", file));
 
             Part[] partArray = parts.toArray(new Part[parts.size()]);
 
@@ -105,7 +105,7 @@ public class DefaultEpisodicService implements EpisodicService {
 
     }
 
-    public String createEpisode(String showId, String name, String[] assetIds, boolean publish, String description,
+    public String createEpisode(long showId, String name, long[] assetIds, boolean publish, String description,
                                 String pingUrl, String... tags) {
 
 
@@ -118,13 +118,20 @@ public class DefaultEpisodicService implements EpisodicService {
             map.put("tags", tagString);
         }
 
-        map.put("show_id", showId);
+        map.put("show_id", valueOf(showId));
         map.put("publish", valueOf(publish));
         if (description != null) map.put("description", description);
         if (pingUrl != null) map.put("ping_url", pingUrl);
 
-        map.put("asset_ids", join(assetIds));
-        map.put("ping_url", pingUrl);
+        // convert the asset ids to a string
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < assetIds.length; i++) {
+            builder.append(assetIds[i]);
+            if (i + 1 < assetIds.length) builder.append(',');
+        }
+
+        map.put("asset_ids", builder.toString());
+        if (pingUrl != null) map.put("ping_url", pingUrl);
 
         PostMethod method = new PostMethod(WRITE_API_PREFIX + "create_episode");
         method.setParameter("key", apiKey);
@@ -132,7 +139,6 @@ public class DefaultEpisodicService implements EpisodicService {
         for (Map.Entry<String, String> entry : map.entrySet()) {
             method.setParameter(entry.getKey(), entry.getValue());
         }
-
 
         try {
             HttpClient client = new HttpClient();
@@ -237,7 +243,7 @@ public class DefaultEpisodicService implements EpisodicService {
 
         GetMethod method = new GetMethod(QUERY_API_PREFIX + "episodes");
         method.setQueryString(queryParams);
-        
+
         try {
             HttpClient client = new HttpClient();
             client.executeMethod(method);
