@@ -133,6 +133,20 @@ public class Episode implements Serializable {
         this.downloads = downloads;
     }
 
+    public Player getDefaultPlayer() {
+        if (players != null && players.getPlayers() != null && !players.getPlayers().isEmpty()) {
+
+            for (Player player : players.getPlayers()) {
+
+                if (player.isDefaultPlayer()) {
+                    return player;
+                }
+            }
+        }
+
+        return null;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
