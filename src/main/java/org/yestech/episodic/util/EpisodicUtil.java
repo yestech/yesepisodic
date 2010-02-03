@@ -59,7 +59,7 @@ public final class EpisodicUtil {
     }
 
     /**
-     * Generates the expires value needed to add to episodic reuqests.
+     * Generates the expires value needed to add to episodic requests.
      * <p/>
      * The current number of seconds since epoch (January 1, 1970).
      *
