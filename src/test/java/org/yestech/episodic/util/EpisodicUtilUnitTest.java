@@ -62,5 +62,13 @@ public class EpisodicUtilUnitTest {
         assertEquals("gamma", it.next());
     }
 
+    @Test
+    public void testExpires() {
+        long now = System.currentTimeMillis();
+        String s = EpisodicUtil.expires();
+        long value = Long.parseLong(s) * 1000L;
+        assertTrue(value > now);
+    }
+
 
 }
