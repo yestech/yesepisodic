@@ -1,10 +1,9 @@
 package org.yestech.episodic.util;
 
 import org.joda.time.DateTimeZone;
-import org.yestech.episodic.objectmodel.ErrorResponse;
-import org.yestech.episodic.objectmodel.CreateAssetResponse;
-import org.yestech.episodic.objectmodel.CreateEpisodeResponse;
-import org.yestech.episodic.objectmodel.Shows;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.yestech.episodic.objectmodel.*;
 import org.apache.commons.httpclient.NameValuePair;
 import org.joda.time.DateTime;
 
@@ -12,6 +11,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import java.io.InputStream;
+
 import static java.lang.String.valueOf;
 
 import java.util.*;
@@ -20,6 +20,23 @@ import java.util.*;
  * @author A.J. Wright
  */
 public final class EpisodicUtil {
+
+    private static Logger logger = LoggerFactory.getLogger(EpisodicUtil.class);
+
+    private static JAXBContext ctx;
+
+    static {
+        try {
+            ctx = JAXBContext.newInstance(
+                    ErrorResponse.class,
+                    CreateAssetResponse.class,
+                    CreateEpisodeResponse.class,
+                    Episodes.class,
+                    Shows.class);
+        } catch (JAXBException e) {
+            logger.error(e.getMessage(), e);
+        }
+    }
 
     private EpisodicUtil() {
 
@@ -33,11 +50,6 @@ public final class EpisodicUtil {
      * @throws javax.xml.bind.JAXBException Thrown if there are issues with the xml stream passed in.
      */
     public static Object unmarshall(InputStream content) throws JAXBException {
-        JAXBContext ctx = JAXBContext.newInstance(
-                ErrorResponse.class,
-                CreateAssetResponse.class,
-                CreateEpisodeResponse.class,
-                Shows.class);
         Unmarshaller unmarshaller = ctx.createUnmarshaller();
         return unmarshaller.unmarshal(content);
     }
@@ -61,9 +73,8 @@ public final class EpisodicUtil {
      * Generates the expires value needed to add to episodic requests.
      * <p/>
      * The current number of seconds since epoch (January 1, 1970).
-     *
-     * Actually there is a 10 minute buffer on this so that it will not time out for long uploads.
-     *
+     * <p/>
+     * I hacked this with a 1 day buffer because of problems with timezones etc.
      *
      * @return The current number of seconds since the epoch;
      */
@@ -84,7 +95,7 @@ public final class EpisodicUtil {
         return new TreeSet<String>(map.keySet());
     }
 
-    public static NameValuePair[] toNameValuePairArray(Map<String,String> map) {
+    public static NameValuePair[] toNameValuePairArray(Map<String, String> map) {
         NameValuePair[] pairs = new NameValuePair[map.size()];
         int count = 0;
         for (Map.Entry<String, String> entry : map.entrySet()) {
