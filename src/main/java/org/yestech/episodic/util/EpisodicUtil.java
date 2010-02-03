@@ -1,5 +1,6 @@
 package org.yestech.episodic.util;
 
+import org.joda.time.DateTimeZone;
 import org.yestech.episodic.objectmodel.ErrorResponse;
 import org.yestech.episodic.objectmodel.CreateAssetResponse;
 import org.yestech.episodic.objectmodel.CreateEpisodeResponse;
@@ -12,10 +13,8 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import java.io.InputStream;
 import static java.lang.String.valueOf;
-import java.util.SortedSet;
-import java.util.Map;
-import java.util.TreeSet;
-import java.util.ArrayList;
+
+import java.util.*;
 
 /**
  * @author A.J. Wright
@@ -69,7 +68,7 @@ public final class EpisodicUtil {
      * @return The current number of seconds since the epoch;
      */
     public static String expires() {
-        DateTime dt = new DateTime().plusMinutes(15);
+        DateTime dt = new DateTime(DateTimeZone.UTC).plusMinutes(15);
         return valueOf(dt.getMillis() / 1000L);
     }
 

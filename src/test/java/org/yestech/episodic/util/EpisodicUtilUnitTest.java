@@ -1,6 +1,9 @@
 package org.yestech.episodic.util;
 
 import static junit.framework.Assert.*;
+
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.junit.Test;
 import org.yestech.episodic.objectmodel.*;
 import static org.yestech.episodic.util.EpisodicUtil.*;
@@ -66,7 +69,7 @@ public class EpisodicUtilUnitTest {
     public void testExpires() {
         long now = System.currentTimeMillis();
         String s = EpisodicUtil.expires();
-        long value = Long.parseLong(s) * 1000L;
+        long value = new DateTime(DateTimeZone.UTC).getMillis() * 1000L;
         assertTrue(value > now);
     }
 
