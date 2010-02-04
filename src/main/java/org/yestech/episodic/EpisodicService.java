@@ -14,6 +14,7 @@ import java.io.IOException;
  * @author A.J. Wright
  */
 public interface EpisodicService {
+    void destroy();
 
 
     /**

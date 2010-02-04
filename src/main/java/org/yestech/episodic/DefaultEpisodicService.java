@@ -1,23 +1,36 @@
 package org.yestech.episodic;
 
-import static org.apache.commons.codec.digest.DigestUtils.sha256Hex;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.NameValuePair;
-import org.apache.commons.httpclient.HostConfiguration;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.multipart.FilePart;
-import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
-import org.apache.commons.httpclient.methods.multipart.Part;
-import org.apache.commons.httpclient.methods.multipart.StringPart;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.StatusLine;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIUtils;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.conn.params.ConnRoutePNames;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yestech.episodic.objectmodel.*;
-import static org.yestech.episodic.util.EpisodicUtil.*;
+import org.yestech.episodic.util.EpisodicMultipartEntity;
 
-import javax.xml.bind.JAXBException;
 import java.io.File;
-import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import static java.lang.String.valueOf;
-import java.util.*;
+import static org.apache.commons.codec.digest.DigestUtils.sha256Hex;
+import static org.yestech.episodic.util.EpisodicUtil.*;
 
 
 /**
@@ -29,13 +42,18 @@ import java.util.*;
  */
 public class DefaultEpisodicService implements EpisodicService {
 
+    private static final Logger logger = LoggerFactory.getLogger(DefaultEpisodicService.class);
 
-    protected static final String WRITE_API_PREFIX = "http://api.episodic.com/api/v2/write/";
-    protected static final String QUERY_API_PREFIX = "http://api.episodic.com/api/v2/query/";
+
+    protected static final String SCHEME = "http";
+    protected static final String HOST = "api.episodic.com";
+    protected static final int PORT = 80;
+    protected static final String WRITE_API_PREFIX = "/api/v2/write/";
+    protected static final String QUERY_API_PREFIX = "/api/v2/query/";
 
     protected String apiKey;
     protected String secret;
-    protected HostConfiguration configuration;
+    protected HttpClient client;
 
     /**
      * Creates a new instance .
@@ -46,20 +64,21 @@ public class DefaultEpisodicService implements EpisodicService {
     public DefaultEpisodicService(String secret, String apiKey) {
         this.secret = secret;
         this.apiKey = apiKey;
-        configuration = new HostConfiguration();
+        client = new DefaultHttpClient();
     }
 
     public DefaultEpisodicService(String secret, String apiKey, String proxyHost, int proxyPort) {
-        this.secret = secret;
-        this.apiKey = apiKey;
-        configuration = new HostConfiguration();
-        configuration.setProxy(proxyHost, proxyPort);
+        this(secret, apiKey);
+        client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, new HttpHost(proxyHost, proxyPort));
+    }
+
+    public void destroy() {
+        client.getConnectionManager().shutdown();
     }
 
     public String createAsset(String showId, String name, File file, String... tags) {
 
-        PostMethod method = new PostMethod(WRITE_API_PREFIX + "create_asset");
-
+        HttpPost method = new HttpPost(buildWriteURI("create_asset"));
 
         try {
 
@@ -72,29 +91,21 @@ public class DefaultEpisodicService implements EpisodicService {
                 map.put("tags", tagString);
             }
             map.put("show_id", valueOf(showId));
-            List<Part> parts = new ArrayList<Part>();
+            String signature = generateSignature(secret, map);
+            map.put("signature", signature);
+            map.put("key", apiKey);
+
+            EpisodicMultipartEntity multipartEntity = new EpisodicMultipartEntity();
             for (Map.Entry<String, String> entry : map.entrySet()) {
-                parts.add(new StringPart(entry.getKey(), entry.getValue()));
+                multipartEntity.addPart(entry.getKey(), new StringBody(entry.getValue()));
             }
-            parts.add(new StringPart("signature", generateSignature(secret, map)));
-            parts.add(new StringPart("key", apiKey));
-            parts.add(new FilePart("uploaded_data", file));
+            multipartEntity.addPart("uploaded_data", new FileBody(file));
+            method.setEntity(multipartEntity);
 
-            Part[] partArray = parts.toArray(new Part[parts.size()]);
+            HttpResponse response = client.execute(method);
+            checkStatus(response);
 
-            MultipartRequestEntity mre = new MultipartRequestEntity(partArray, method.getParams());
-            method.setRequestEntity(mre);
-
-            HttpClient client = new HttpClient();
-
-            client.executeMethod(configuration, method);
-
-            if (method.getStatusCode() != 200) {
-                throw new EpisodicException(method.getStatusCode(), method.getStatusText());
-            }
-
-
-            Object o = unmarshall(method.getResponseBodyAsStream());
+            Object o = unmarshall(response);
 
             if (o instanceof ErrorResponse) {
                 throw new EpisodicException((ErrorResponse) o);
@@ -105,12 +116,10 @@ public class DefaultEpisodicService implements EpisodicService {
             }
 
 
-        } catch (IOException e) {
+        } catch (Exception e) {
+            logger.error(e.getMessage(),  e);
+            method.abort();
             throw new TransportException(e.getMessage(), e);
-        } catch (JAXBException e) {
-            throw new TransportException(e.getMessage(), e);
-        } finally {
-            method.releaseConnection();
         }
 
     }
@@ -118,6 +127,7 @@ public class DefaultEpisodicService implements EpisodicService {
     public String createEpisode(String showId, String name, String[] assetIds, boolean publish, String description,
                                 String pingUrl, String... tags) {
 
+        HttpPost method = new HttpPost(buildWriteURI("create_episode"));
 
         Map<String, String> map = new HashMap<String, String>();
         map.put("expires", expires());
@@ -136,22 +146,18 @@ public class DefaultEpisodicService implements EpisodicService {
         map.put("asset_ids", join(assetIds));
         if (pingUrl != null) map.put("ping_url", pingUrl);
 
-        PostMethod method = new PostMethod(WRITE_API_PREFIX + "create_episode");
-        method.setParameter("key", apiKey);
-        method.setParameter("signature", generateSignature(secret, map));
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            method.setParameter(entry.getKey(), entry.getValue());
-        }
+        map.put("signature", generateSignature(secret, map));
+        map.put("key", apiKey);
 
         try {
-            HttpClient client = new HttpClient();
-            client.executeMethod(configuration, method);
 
-            if (method.getStatusCode() != 200) {
-                throw new EpisodicException(method.getStatusCode(), method.getStatusText());
-            }
+            UrlEncodedFormEntity entity = new UrlEncodedFormEntity(toNameValuePairList(map), "UTF-8");
+            method.setEntity(entity);
 
-            Object o = unmarshall(method.getResponseBodyAsStream());
+            HttpResponse response = client.execute(method);
+            checkStatus(response);
+
+            Object o = unmarshall(response);
 
             if (o instanceof ErrorResponse) {
                 throw new EpisodicException((ErrorResponse) o);
@@ -161,13 +167,10 @@ public class DefaultEpisodicService implements EpisodicService {
                 throw new IllegalStateException("unknown response : " + o);
             }
 
-
-        } catch (JAXBException e) {
+        } catch (Exception e) {
+            logger.error(e.getMessage(),  e);
+            method.abort();
             throw new TransportException(e.getMessage(), e);
-        } catch (IOException e) {
-            throw new TransportException(e.getMessage(), e);
-        } finally {
-            method.releaseConnection();
         }
 
     }
@@ -186,21 +189,13 @@ public class DefaultEpisodicService implements EpisodicService {
         map.put("signature", generateSignature(secret, map));
         map.put("key", apiKey);
 
-        NameValuePair[] queryParams = toNameValuePairArray(map);
-
-        GetMethod method = new GetMethod(QUERY_API_PREFIX + "shows");
-        method.setQueryString(queryParams);
-
+        HttpGet method = new HttpGet(buildQueryURI("shows", map));
 
         try {
-            HttpClient client = new HttpClient();
-            client.executeMethod(configuration, method);
+            HttpResponse response = client.execute(method);
+            checkStatus(response);
 
-            if (method.getStatusCode() != 200) {
-                throw new EpisodicException(method.getStatusCode(), method.getStatusText());
-            }
-
-            Object o = unmarshall(method.getResponseBodyAsStream());
+            Object o = unmarshall(response);
 
             if (o instanceof ErrorResponse) {
                 throw new EpisodicException((ErrorResponse) o);
@@ -211,12 +206,10 @@ public class DefaultEpisodicService implements EpisodicService {
             }
 
 
-        } catch (JAXBException e) {
+        } catch (Exception e) {
+            logger.error(e.getMessage(),  e);
+            method.abort();
             throw new TransportException(e.getMessage(), e);
-        } catch (IOException e) {
-            throw new TransportException(e.getMessage(), e);
-        } finally {
-            method.releaseConnection();
         }
 
     }
@@ -241,21 +234,13 @@ public class DefaultEpisodicService implements EpisodicService {
         map.put("signature", generateSignature(secret, map));
         map.put("key", apiKey);
 
-        NameValuePair[] queryParams = toNameValuePairArray(map);
-
-
-        GetMethod method = new GetMethod(QUERY_API_PREFIX + "episodes");
-        method.setQueryString(queryParams);
+        HttpGet method = new HttpGet(buildQueryURI("episodes", map));
 
         try {
-            HttpClient client = new HttpClient();
-            client.executeMethod(configuration, method);
+            HttpResponse response = client.execute(method);
+            checkStatus(response);
 
-            if (method.getStatusCode() != 200) {
-                throw new EpisodicException(method.getStatusCode(), method.getStatusText());
-            }
-
-            Object o = unmarshall(method.getResponseBodyAsStream());
+            Object o = unmarshall(response);
 
             if (o instanceof ErrorResponse) {
                 throw new EpisodicException((ErrorResponse) o);
@@ -265,15 +250,11 @@ public class DefaultEpisodicService implements EpisodicService {
                 throw new IllegalStateException("unknown response : " + o);
             }
 
-
-        } catch (JAXBException e) {
+        } catch (Exception e) {
+            logger.error(e.getMessage(),  e);
+            method.abort();
             throw new TransportException(e.getMessage(), e);
-        } catch (IOException e) {
-            throw new TransportException(e.getMessage(), e);
-        } finally {
-            method.releaseConnection();
         }
-
     }
 
 
@@ -308,6 +289,8 @@ public class DefaultEpisodicService implements EpisodicService {
     }
 
     // split out because episode map method was too complex for intellij
+
+    @SuppressWarnings({"ConstantConditions"})
     private Map<String, String> buildEpisodeMap(String[] showIds, String[] episodeIds, String searchTerm,
                                                 SearchType searchType, TagMode tagMode, Episode.EpisodeStatus status,
                                                 SortBy sortBy, SortDir sortDir, Boolean includeViews, Integer page,
@@ -327,6 +310,31 @@ public class DefaultEpisodicService implements EpisodicService {
         if (embedWidth != null) map.put("embed_width", embedWidth.toString());
         if (embedHeight != null) map.put("embed_height", embedHeight.toString());
         return map;
+    }
+
+
+    private URI buildQueryURI(String call, Map<String, String> params) {
+        List<NameValuePair> qparams = toNameValuePairList(params);
+        try {
+            return URIUtils.createURI(SCHEME, HOST, PORT, QUERY_API_PREFIX + call, URLEncodedUtils.format(qparams, "UTF-8"), null);
+        } catch (URISyntaxException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private URI buildWriteURI(String call) {
+        try {
+            return URIUtils.createURI(SCHEME, HOST, PORT, WRITE_API_PREFIX + call, null, null);
+        } catch (URISyntaxException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private void checkStatus(HttpResponse response) {
+        StatusLine statusLine = response.getStatusLine();
+        if (statusLine.getStatusCode() != 200) {
+            throw new EpisodicException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
+        }
     }
 
 

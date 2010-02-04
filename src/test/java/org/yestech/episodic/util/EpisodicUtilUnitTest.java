@@ -22,27 +22,6 @@ import java.util.SortedSet;
 public class EpisodicUtilUnitTest {
 
     @Test
-    public void testUnmarshallShows() throws JAXBException, UnsupportedEncodingException {
-        Object o = unmarshall(new ByteArrayInputStream(ShowsUnitTest.XML.getBytes("utf-8")));
-        assertNotNull(o);
-        assertTrue(o instanceof Shows);
-    }
-
-    @Test
-    public void testCreateAssertResponse() throws JAXBException, UnsupportedEncodingException {
-        Object o = unmarshall(new ByteArrayInputStream(CreateAssetResponseUnitTest.XML.getBytes("utf-8")));
-        assertNotNull(o);
-        assertTrue(o instanceof CreateAssetResponse);
-    }
-
-    @Test
-    public void testCreateEpisodeResponse() throws JAXBException, UnsupportedEncodingException {
-        Object o = unmarshall(new ByteArrayInputStream(CreateEpisodeResponseUnitTest.XML.getBytes("utf-8")));
-        assertNotNull(o);
-        assertTrue(o instanceof CreateEpisodeResponse);
-    }
-
-    @Test
     public void testJoin() {
         String[] array = new String[]{"foo", "bar", "baz"};
         String result = join(array);
@@ -67,10 +46,10 @@ public class EpisodicUtilUnitTest {
 
     @Test
     public void testExpires() {
-        long now = System.currentTimeMillis();
+        long now = new DateTime(DateTimeZone.UTC).getMillis();
         String s = EpisodicUtil.expires();
-        long value = new DateTime(DateTimeZone.UTC).getMillis() * 1000L;
-        assertTrue(value > now);
+        long value = Long.parseLong(s) * 1000L;
+        assertTrue("The expires values show be larger then the current milliseconds", value > now);
     }
 
 

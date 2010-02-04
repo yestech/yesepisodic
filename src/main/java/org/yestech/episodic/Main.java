@@ -96,6 +96,12 @@ public class Main {
     @Option(name = "-pingUrl", usage = "Url for the application to ping back after publish [create_episode]")
     private String pingUrl;
 
+    @Option(name = "-proxy-port", usage = "Port for http proxy")
+    private Integer proxyPort;
+
+    @Option(name = "-proxy-host", usage = "Host for proxy")
+    private String proxyHost;
+
     String[] shows() {
         return showIds.toArray(new String[showIds.size()]);
     }
@@ -120,27 +126,38 @@ public class Main {
         parser.setUsageWidth(80); // width of the error display area
         try {
             parser.parseArgument(args);
-            DefaultEpisodicService service = new DefaultEpisodicService(main.secret, main.apiKey);
 
-            out.println("Executing: " + main.toString());
-            Object xmlResult = null;
-            if (main.operation == Operation.list_shows) {
-                xmlResult = list_shows(service, main);
-            } else if (main.operation == Operation.list_episodes) {
-                xmlResult = list_episodes(service, main);
-            } else if (main.operation == Operation.create_asset) {
-                String assetId = create_asset(service, main);
-                System.out.println("Successfully created asset with id " + assetId);
-            } else if (main.operation == Operation.create_episode) {
-                String episodeId = create_episode(service, main);
-                System.out.println("Successfully created episode with id "+episodeId);
-            } else if (main.operation == Operation.full_create) {
-                String episodeId = full_create(service, main);
-                System.out.println("Successfully created episode with id "+episodeId);
+            DefaultEpisodicService service;
+            if (main.proxyHost != null && main.proxyPort != null) {
+                service = new DefaultEpisodicService(main.secret, main.apiKey, main.proxyHost, main.proxyPort);
+            }
+            else {
+                service = new DefaultEpisodicService(main.secret, main.apiKey);
             }
 
-            if (xmlResult != null) {
-                displayXmlResult(xmlResult);
+            try {
+                out.println("Executing: " + main.toString());
+                Object xmlResult = null;
+                if (main.operation == Operation.list_shows) {
+                    xmlResult = list_shows(service, main);
+                } else if (main.operation == Operation.list_episodes) {
+                    xmlResult = list_episodes(service, main);
+                } else if (main.operation == Operation.create_asset) {
+                    String assetId = create_asset(service, main);
+                    System.out.println("Successfully created asset with id " + assetId);
+                } else if (main.operation == Operation.create_episode) {
+                    String episodeId = create_episode(service, main);
+                    System.out.println("Successfully created episode with id "+episodeId);
+                } else if (main.operation == Operation.full_create) {
+                    String episodeId = full_create(service, main);
+                    System.out.println("Successfully created episode with id "+episodeId);
+                }
+
+                if (xmlResult != null) {
+                    displayXmlResult(xmlResult);
+                }
+            } finally {
+                service.destroy();
             }
 
         } catch (CmdLineException e) {
