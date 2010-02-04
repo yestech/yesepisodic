@@ -6,7 +6,7 @@
     <packaging>jar</packaging>
     <version>1.0.1-SNAPSHOT</version>
     <name>yesepisodic</name>
-    <url>http://maven.apache.org</url>
+    <url>http://yestech.org/sites/yesepisodic/</url>
     <parent>
         <groupId>org.yestech</groupId>
         <artifactId>yessuperpom</artifactId>
@@ -14,9 +14,21 @@
     </parent>
     <developers>
         <developer>
+            <id>aj</id>
             <name>A.J. Wright</name>
+            <email>http://mailhide.recaptcha.net/d?k=01XGJqL3AfJ8OIctt55OP0EQ==&amp;c=yMN1KnVMTvKWW8izuRB-8ddgh1w0xLcBydfczqiwt2E=</email>
+            <roles>
+                <role>Architect</role>
+                <role>Engineer</role>
+                <role>God Emperor</role>
+            </roles>
         </developer>
     </developers>
+    <scm>
+        <connection>scm:git:git://github.com/yestech/yesepisodic.git</connection>
+        <developerConnection>scm:git:git://github.com/yestech/yesepisodic.git</developerConnection>
+        <url>http://github.com/yestech/yesepisodic/tree/master</url>
+    </scm>
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
