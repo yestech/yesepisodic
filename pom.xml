@@ -7,6 +7,16 @@
     <version>1.0.1-SNAPSHOT</version>
     <name>yesepisodic</name>
     <url>http://maven.apache.org</url>
+    <parent>
+        <groupId>org.yestech</groupId>
+        <artifactId>yessuperpom</artifactId>
+        <version>1.2.0</version>
+    </parent>
+    <developers>
+        <developer>
+            <name>A.J. Wright</name>
+        </developer>
+    </developers>
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -107,16 +117,4 @@
             </build>
         </profile>
     </profiles>
-    <distributionManagement>
-        <repository>
-            <id>yestech.release</id>
-            <name>Yestech release repository</name>
-            <url>http://repo.yestech.org/content/repositories/releases</url>
-        </repository>
-        <snapshotRepository>
-            <id>yestech.snapshots</id>
-            <name>Yestech snapshots repository</name>
-            <url>http://repo.yestech.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
 </project>
