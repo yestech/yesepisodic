@@ -44,6 +44,12 @@
             <artifactId>args4j</artifactId>
             <version>2.0.12</version>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <version>1.5.8</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
     <build>
         <pluginManagement>
