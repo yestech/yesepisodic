@@ -1,26 +1,46 @@
 package org.yestech.episodic.util;
 
-import org.yestech.episodic.objectmodel.ErrorResponse;
-import org.yestech.episodic.objectmodel.CreateAssetResponse;
-import org.yestech.episodic.objectmodel.CreateEpisodeResponse;
-import org.yestech.episodic.objectmodel.Shows;
-import org.apache.commons.httpclient.NameValuePair;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
+import org.joda.time.DateTimeZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.yestech.episodic.objectmodel.*;
 import org.joda.time.DateTime;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
-import java.io.InputStream;
+
 import static java.lang.String.valueOf;
-import java.util.SortedSet;
-import java.util.Map;
-import java.util.TreeSet;
-import java.util.ArrayList;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.*;
 
 /**
  * @author A.J. Wright
  */
 public final class EpisodicUtil {
+
+    private static Logger logger = LoggerFactory.getLogger(EpisodicUtil.class);
+
+    private static JAXBContext ctx;
+
+    static {
+        try {
+            ctx = JAXBContext.newInstance(
+                    ErrorResponse.class,
+                    CreateAssetResponse.class,
+                    CreateEpisodeResponse.class,
+                    Episodes.class,
+                    Shows.class);
+        } catch (JAXBException e) {
+            logger.error(e.getMessage(), e);
+        }
+    }
 
     private EpisodicUtil() {
 
@@ -29,18 +49,14 @@ public final class EpisodicUtil {
     /**
      * Unmarshalls the input stream into an object from org.yestech.episodic.objectmodel.
      *
-     * @param content input stream containing xml content.
+     * @param response the response
      * @return The unmarshalled object.
      * @throws javax.xml.bind.JAXBException Thrown if there are issues with the xml stream passed in.
      */
-    public static Object unmarshall(InputStream content) throws JAXBException {
-        JAXBContext ctx = JAXBContext.newInstance(
-                ErrorResponse.class,
-                CreateAssetResponse.class,
-                CreateEpisodeResponse.class,
-                Shows.class);
+    public static Object unmarshall(HttpResponse response) throws JAXBException, IOException {
+        String xml = EntityUtils.toString(response.getEntity());
         Unmarshaller unmarshaller = ctx.createUnmarshaller();
-        return unmarshaller.unmarshal(content);
+        return unmarshaller.unmarshal(new StringReader(xml));
     }
 
     /**
@@ -59,17 +75,16 @@ public final class EpisodicUtil {
     }
 
     /**
-     * Generates the expires value needed to add to episodic reuqests.
+     * Generates the expires value needed to add to episodic requests.
      * <p/>
      * The current number of seconds since epoch (January 1, 1970).
-     *
-     * Actually there is a 10 minute buffer on this so that it will not time out for long uploads.
-     *
+     * <p/>
+     * I hacked this with a 1 day buffer because of problems with timezones etc.
      *
      * @return The current number of seconds since the epoch;
      */
     public static String expires() {
-        DateTime dt = new DateTime().plusMinutes(15);
+        DateTime dt = new DateTime(DateTimeZone.UTC).plusMinutes(15);
         return valueOf(dt.getMillis() / 1000L);
     }
 
@@ -85,12 +100,10 @@ public final class EpisodicUtil {
         return new TreeSet<String>(map.keySet());
     }
 
-    public static NameValuePair[] toNameValuePairArray(Map<String,String> map) {
-        NameValuePair[] pairs = new NameValuePair[map.size()];
-        int count = 0;
+    public static List<NameValuePair> toNameValuePairList(Map<String, String> map) {
+        List<NameValuePair> pairs = new ArrayList<NameValuePair>(map.size());
         for (Map.Entry<String, String> entry : map.entrySet()) {
-            pairs[count] = new NameValuePair(entry.getKey(), entry.getValue());
-            count++;
+            pairs.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
         }
         return pairs;
     }

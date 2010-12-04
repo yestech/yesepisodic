@@ -1,6 +1,9 @@
 package org.yestech.episodic.util;
 
 import static junit.framework.Assert.*;
+
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.junit.Test;
 import org.yestech.episodic.objectmodel.*;
 import static org.yestech.episodic.util.EpisodicUtil.*;
@@ -17,27 +20,6 @@ import java.util.SortedSet;
  * @author A.J. Wright
  */
 public class EpisodicUtilUnitTest {
-
-    @Test
-    public void testUnmarshallShows() throws JAXBException, UnsupportedEncodingException {
-        Object o = unmarshall(new ByteArrayInputStream(ShowsUnitTest.XML.getBytes("utf-8")));
-        assertNotNull(o);
-        assertTrue(o instanceof Shows);
-    }
-
-    @Test
-    public void testCreateAssertResponse() throws JAXBException, UnsupportedEncodingException {
-        Object o = unmarshall(new ByteArrayInputStream(CreateAssetResponseUnitTest.XML.getBytes("utf-8")));
-        assertNotNull(o);
-        assertTrue(o instanceof CreateAssetResponse);
-    }
-
-    @Test
-    public void testCreateEpisodeResponse() throws JAXBException, UnsupportedEncodingException {
-        Object o = unmarshall(new ByteArrayInputStream(CreateEpisodeResponseUnitTest.XML.getBytes("utf-8")));
-        assertNotNull(o);
-        assertTrue(o instanceof CreateEpisodeResponse);
-    }
 
     @Test
     public void testJoin() {
@@ -60,6 +42,14 @@ public class EpisodicUtilUnitTest {
         assertEquals("alpha", it.next());
         assertEquals("beta", it.next());
         assertEquals("gamma", it.next());
+    }
+
+    @Test
+    public void testExpires() {
+        long now = new DateTime(DateTimeZone.UTC).getMillis();
+        String s = EpisodicUtil.expires();
+        long value = Long.parseLong(s) * 1000L;
+        assertTrue("The expires values show be larger then the current milliseconds", value > now);
     }
 
 

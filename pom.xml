@@ -1,4 +1,3 @@
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -6,7 +5,7 @@
     <artifactId>yesepisodic</artifactId>
     <packaging>jar</packaging>
     <version>1.1.0-SNAPSHOT</version>
-    <name>YES Episodic</name>
+    <name>yesepisodic</name>
     <url>http://yestech.org/sites/yesepisodic/</url>
     <description>Framework to interface with eposidic api</description>
     <parent>
@@ -32,20 +31,13 @@
     </licenses>
     <developers>
         <developer>
-            <id>artie</id>
-            <name>Artie Copeland</name>
-            <email>http://mailhide.recaptcha.net/d?k=013dif-8KmF_OR5-Zs49rn9w==&amp;c=ZDwNN9ZwWomHpMAaLEW0Rt3HB4aATO6AM20eeZNxLS4=</email>
-            <roles>
-                <role>architect</role>
-                <role>developer</role>
-            </roles>
-        </developer>
-        <developer>
             <id>aj</id>
-            <name>AJ Wright</name>
-            <email>ayax79@gmail.com</email>
+            <name>A.J. Wright</name>
+            <email>http://mailhide.recaptcha.net/d?k=01XGJqL3AfJ8OIctt55OP0EQ==&amp;c=yMN1KnVMTvKWW8izuRB-8ddgh1w0xLcBydfczqiwt2E=</email>
             <roles>
-                <role>developer</role>
+                <role>Architect</role>
+                <role>Engineer</role>
+                <role>God Emperor</role>
             </roles>
         </developer>
     </developers>
@@ -55,9 +47,20 @@
     </ciManagement>
     <dependencies>
         <dependency>
-            <groupId>commons-httpclient</groupId>
-            <artifactId>commons-httpclient</artifactId>
-            <version>3.1</version>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.5</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpmime</artifactId>
+            <version>4.0.1</version>
         </dependency>
         <dependency>
             <groupId>joda-time</groupId>
@@ -74,10 +77,29 @@
             <artifactId>commons-codec</artifactId>
             <version>1.4</version>
         </dependency>
+        <dependency>
+            <groupId>args4j</groupId>
+            <artifactId>args4j</artifactId>
+            <version>2.0.12</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <version>1.5.8</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <source>1.6</source>
+                        <target>1.6</target>
+                    </configuration>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
@@ -90,4 +112,37 @@
             </plugins>
         </pluginManagement>
     </build>
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
